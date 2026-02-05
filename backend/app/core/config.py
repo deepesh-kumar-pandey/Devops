@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     # Docker
     DOCKER_HOST: str = "unix:///var/run/docker.sock"
     
+    # GitHub Integration
+    GITHUB_PAT: str = ""
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=True,
