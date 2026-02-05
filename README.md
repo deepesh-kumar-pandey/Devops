@@ -130,4 +130,4 @@ See `.env.example` files in backend and frontend directories for required config
 
 ## License
 
-MIT License
+Distributed under the [MIT License](LICENSE). See `LICENSE` for more information.
