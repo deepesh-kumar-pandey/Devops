@@ -1,5 +1,16 @@
 from datetime import datetime, timedelta
 from typing import Optional
+
+# --- Passlib + bcrypt >= 4.0 compatibility patch ---
+# passlib 1.7.4 reads bcrypt.__about__.__version__ which was removed in bcrypt 4.0+.
+# This patch restores it so password hashing/verification works correctly.
+import bcrypt
+if not hasattr(bcrypt, '__about__'):
+    class _About:
+        __version__ = bcrypt.__version__
+    bcrypt.__about__ = _About()
+# --- End patch ---
+
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
