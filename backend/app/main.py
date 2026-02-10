@@ -9,16 +9,29 @@ from app.models import base
 from app.api.v1 import router as api_router
 
 
+import redis.asyncio as redis
+from fastapi_limiter import FastAPILimiter
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
     print("🚀 Starting DevOps Platform...")
+    
+    # Check for weak secret key
+    if settings.SECRET_KEY == "your-secret-key-change-in-production":
+        print("⚠️  WARNING: You are using the default weak SECRET_KEY. Please change it in .env for production!")
+
+    # Initialize Rate Limiter
+    redis_instance = redis.from_url(settings.REDIS_URL, encoding="utf-8", decode_responses=True)
+    await FastAPILimiter.init(redis_instance)
+
     # Create database tables
     async with engine.begin() as conn:
         await conn.run_sync(base.Base.metadata.create_all)
     yield
     # Shutdown
     print("👋 Shutting down DevOps Platform...")
+    await FastAPILimiter.close()
 
 
 app = FastAPI(
@@ -50,6 +63,7 @@ async def add_security_headers(request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
     return response
 
 
